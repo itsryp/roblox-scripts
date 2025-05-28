@@ -1,3 +1,5 @@
+print("loaded friendviewer.lua")
+
 local players = game:GetService("Players")
 local runService = game:GetService("RunService")
 local cam = workspace.CurrentCamera
