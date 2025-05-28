@@ -1,6 +1,9 @@
 local players = game:GetService("Players")
 local runService = game:GetService("RunService")
 local cam = workspace.CurrentCamera
+local drawing = Drawing.new
+
+local threshold = 25
 
 local oldlines = {}
 local friendships = {}
@@ -9,10 +12,14 @@ function trackplayers(p1, p2)
     while true do
         task.wait(0)
         if not p1 or not p2 then continue end
+        -- print('new line for',p1,p2)
         local p1Char = p1.Character or p1.CharacterAdded:Wait()
         local p2Char = p2.Character or p2.CharacterAdded:Wait()
-        local p1Pos, vis1 = cam:WorldToViewportPoint(p1Char:GetPivot().Position)
-        local p2Pos, vis2 = cam:WorldToViewportPoint(p2Char:GetPivot().Position)
+        local p1Piv, p2Piv = p1Char:GetPivot(), p2Char:GetPivot()
+        local dist = (p1Piv.Position - p2Piv.Position).Magnitude
+        local color = Color3.fromRGB(255,0,0):Lerp(Color3.fromRGB(0,255,0), math.clamp(1 / (dist / threshold), 0, 1))
+        local p1Pos, vis1 = cam:WorldToViewportPoint(p1Piv.Position)
+        local p2Pos, vis2 = cam:WorldToViewportPoint(p2Piv.Position)
         if vis1 == false and vis2 == false then continue end
         local vpSize = cam.ViewportSize
         -- p1Pos = Vector3.new(-p1Pos.X, math.sign(p1Pos.Y), -p1Pos.Z)
@@ -34,20 +41,20 @@ function trackplayers(p1, p2)
         end
         p1Pos = Vector2.new(p1Pos.X, p1Pos.Y)
         p2Pos = Vector2.new(p2Pos.X, p2Pos.Y)
-        local line = Drawing.new("Line")
-        local dot1 = Drawing.new("Circle")
-        local dot2 = Drawing.new("Circle")
+        local line = drawing("Line")
+        local dot1 = drawing("Circle")
+        local dot2 = drawing("Circle")
         --line1
         line.Visible = true
         line.From = p1Pos
         line.To = p2Pos
-        line.Color = Color3.fromRGB(69, 162, 255)
+        line.Color = color
         line.Thickness = 2
         line.Transparency = 0.5
         --dot1
         dot1.Visible = vis1
         dot1.Position = p1Pos
-        dot1.Color = Color3.fromRGB(69, 162, 255)
+        dot1.Color = color
         dot1.Thickness = 2
         dot1.Radius = 6
         dot1.Filled = true
@@ -56,7 +63,7 @@ function trackplayers(p1, p2)
         --dot2
         dot2.Visible = vis2
         dot2.Position = p2Pos
-        dot2.Color = Color3.fromRGB(69, 162, 255)
+        dot2.Color = color
         dot2.Thickness = 2
         dot2.Radius = 6
         dot2.Filled = true
